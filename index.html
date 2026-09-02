@@ -14,42 +14,49 @@
 
         body {
             font-family: 'Tajawal', sans-serif;
-            /* لون غامق جداً يندمج مع حواف الصورة */
             background-color: #0f1013; 
-            background-image: url('image_eedd30.png'); 
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
+            overflow-x: hidden;
+            margin: 0;
         }
 
-        /* برمجة ذكية: لو فتحت من الجوال (بالطول) */
-        @media (orientation: portrait) {
-            body {
-                /* يخلي الصورة تاخد عرض الشاشة بالكامل علشان الأجنحة تبان كلها */
-                background-size: 100% auto; 
-            }
-        }
-
-        /* برمجة ذكية: لو فتحت من الكمبيوتر (بالعرض) */
-        @media (orientation: landscape) {
-            body {
-                /* يخلي الصورة تملى الشاشة كلها بدون أي فراغات سودة */
-                background-size: cover; 
-            }
-        }
-
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background: rgba(0, 0, 0, 0.35); /* تعتيم خفيف علشان الكلام يوضح */
+        /* 1. طبقة التمويه (Smart Blur): تملى الشاشة كلها وتمنع أي مساحات سوداء نهائياً */
+        .bg-blur {
+            position: fixed;
+            top: -5%; left: -5%; right: -5%; bottom: -5%; /* مساحة أكبر لمنع الحواف البيضاء */
+            background-image: url('image_eedd30.png');
+            background-size: cover;
+            background-position: center;
+            filter: blur(25px) brightness(0.3); /* مموهة ومظلمة لتعطي فخامة للواجهة */
             z-index: 1;
+        }
+
+        /* 2. طبقة الصورة الأساسية: تحتفظ بحجمها الكامل (الأجنحة والتاج) بدون أي قص */
+        .bg-clear {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('image_eedd30.png');
+            background-size: contain; /* مستحيل تقص الصورة مهما كان حجم الشاشة */
+            background-position: center top 2%; /* التاج يفضل فوق */
+            background-repeat: no-repeat;
+            z-index: 2;
+        }
+
+        /* برمجة ذكية للموبايل: ننزل الأداة لتحت علشان الصورة والـ QR كود يبانوا كاملين فوق */
+        @media (max-width: 768px) {
+            body {
+                justify-content: flex-end; /* دفع المربع لأسفل الشاشة */
+                padding-bottom: 5vh;
+            }
+            .bg-clear {
+                background-position: top center; /* تثبيت الصورة من الأعلى */
+                background-size: 100% auto; /* عرض كامل */
+            }
         }
 
         .glass-card {
@@ -63,8 +70,8 @@
             max-width: 380px; 
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            z-index: 2;
-            margin-bottom: 15px;
+            z-index: 3;
+            position: relative;
         }
 
         h1 {
@@ -152,7 +159,6 @@
             z-index: 3;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
             margin-top: 10px;
-            padding-bottom: 10px;
         }
 
         @media (max-width: 350px) {
@@ -163,6 +169,12 @@
     </style>
 </head>
 <body>
+
+    <!-- طبقة التمويه لمنع المساحات السوداء -->
+    <div class="bg-blur"></div>
+    
+    <!-- الصورة الأساسية الكاملة -->
+    <div class="bg-clear"></div>
 
     <div class="glass-card">
         <h1>بابا المجال</h1>
@@ -202,20 +214,15 @@
             reader.onload = function(e) {
                 let content = e.target.result;
                 
-                let normalizedContent = content.replace(/
-|/g, '
-');
-                let crlfContent = normalizedContent.replace(/
-/g, '
-');
+                let normalizedContent = content.replace(/\r\n|\r/g, '\n');
+                let crlfContent = normalizedContent.replace(/\n/g, '\r\n');
                 
                 let prefixString = '';
                 let namePrefix = '';
                 
                 if (multiplier > 0) {
                     for (let i = 0; i < multiplier; i++) {
-                        prefixString += '
-';
+                        prefixString += '\r\n';
                         namePrefix += 'CRLF_';
                     }
                 } else {
