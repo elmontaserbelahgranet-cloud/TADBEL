@@ -175,10 +175,11 @@
 
         <div class="input-group">
             <label for="multiplier">عدد مرات النسخ (CRLF):</label>
-            <input type="number" id="multiplier" min="0" value="0">
+            <!-- القيمة الافتراضية بقت 1 علشان ينزل ملف واحد على الأقل -->
+            <input type="number" id="multiplier" min="1" value="1">
         </div>
 
-        <button onclick="processFile()">تنفيذ وتحميل الملف</button>
+        <button onclick="processFile()">تنفيذ وتحميل الملفات</button>
     </div>
 
     <div class="footer">
@@ -189,68 +190,77 @@
         function processFile() {
             const fileInput = document.getElementById('fileInput');
             const multiplierInput = document.getElementById('multiplier').value;
-            const multiplier = parseInt(multiplierInput) || 0;
+            const multiplier = parseInt(multiplierInput) || 1;
 
             if (fileInput.files.length === 0) {
                 alert('يرجى اختيار ملف أولاً.');
+                return;
+            }
+            
+            if (multiplier < 1) {
+                alert('يرجى إدخال رقم 1 أو أكثر.');
                 return;
             }
 
             const file = fileInput.files[0];
             const reader = new FileReader();
 
-            // السر هنا: قراءة الملف كـ ArrayBuffer (بيانات خام) لتجنب تلف التشفير واللغة العربية
+            // قراءة الملف كـ ArrayBuffer للحفاظ على التشفير
             reader.onload = function(e) {
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
                 
-                // 1. حساب عدد فواصل الأسطر (LF) التي تحتاج إلى تحويل
                 let extraBytes = 0;
                 for (let i = 0; i < view.length; i++) {
-                    if (view[i] === 10) { // 10 هو كود الـ LF (سطر جديد)
-                        if (i === 0 || view[i - 1] !== 13) { // 13 هو كود الـ CR
+                    if (view[i] === 10) { 
+                        if (i === 0 || view[i - 1] !== 13) { 
                             extraBytes++;
                         }
                     }
                 }
                 
-                // 2. إنشاء مصفوفة جديدة بالحجم الجديد وبناء الملف من جديد بشكل سليم 100%
                 const newView = new Uint8Array(view.length + extraBytes);
                 let j = 0;
                 for (let i = 0; i < view.length; i++) {
                     if (view[i] === 10 && (i === 0 || view[i - 1] !== 13)) {
-                        newView[j++] = 13; // إدراج بايت الـ CR قبل الـ LF
+                        newView[j++] = 13; 
                     }
-                    newView[j++] = view[i]; // نسخ البايت الأصلي كما هو
+                    newView[j++] = view[i]; 
                 }
 
-                // 3. معالجة اسم الملف لإضافة CRLF
-                let namePrefix = '';
-                let count = multiplier > 0 ? multiplier : 1; 
-                for (let i = 0; i < count; i++) {
-                    namePrefix += 'CRLF_';
-                }
-
-                // 4. إنشاء وتنزيل الملف بصيغة البيانات الخام
                 const blob = new Blob([newView], { type: 'application/octet-stream' });
-                const downloadUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                
-                const newName = namePrefix + file.name;
+                const originalName = file.name;
 
-                a.href = downloadUrl;
-                a.download = newName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(downloadUrl);
+                // التعديل الجديد: تحميل ملفات متعددة بشكل مستقل بناءً على الرقم المدخل
+                for (let i = 1; i <= multiplier; i++) {
+                    // استخدام setTimeout لعمل فاصل زمني (نصف ثانية) بين كل تحميل
+                    // علشان المتصفح ميعتبرهاش Spam ويمنع التحميل المتعدد
+                    setTimeout(() => {
+                        let namePrefix = '';
+                        for (let k = 0; k < i; k++) {
+                            namePrefix += 'CRLF_';
+                        }
+                        
+                        const newName = namePrefix + originalName;
+                        const downloadUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        
+                        a.href = downloadUrl;
+                        a.download = newName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        
+                        // تنظيف الذاكرة بعد التحميل
+                        setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
+                    }, i * 500); // زيادة الوقت لكل ملف
+                }
             };
 
             reader.onerror = function() {
                 alert('حدث خطأ أثناء قراءة الملف.');
             };
 
-            // القراءة كبيانات خام للحفاظ على هيكل ملف البنك
             reader.readAsArrayBuffer(file);
         }
     </script>
