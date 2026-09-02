@@ -14,9 +14,9 @@
 
         body {
             font-family: 'Tajawal', sans-serif;
-            background-color: #121318; 
+            /* لون غامق جداً يندمج مع حواف الصورة */
+            background-color: #0f1013; 
             background-image: url('image_eedd30.png'); 
-            background-size: cover; /* التعديل هنا: cover بتجبر الصورة تملى الشاشة كلها بدون أي فراغات سوداء */
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -28,21 +28,37 @@
             position: relative;
         }
 
+        /* برمجة ذكية: لو فتحت من الجوال (بالطول) */
+        @media (orientation: portrait) {
+            body {
+                /* يخلي الصورة تاخد عرض الشاشة بالكامل علشان الأجنحة تبان كلها */
+                background-size: 100% auto; 
+            }
+        }
+
+        /* برمجة ذكية: لو فتحت من الكمبيوتر (بالعرض) */
+        @media (orientation: landscape) {
+            body {
+                /* يخلي الصورة تملى الشاشة كلها بدون أي فراغات سودة */
+                background-size: cover; 
+            }
+        }
+
         body::before {
             content: "";
             position: absolute;
             top: 0; right: 0; bottom: 0; left: 0;
-            background: rgba(0, 0, 0, 0.25); 
+            background: rgba(0, 0, 0, 0.35); /* تعتيم خفيف علشان الكلام يوضح */
             z-index: 1;
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 35px 25px;
             border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
             width: 88%;
             max-width: 380px; 
             text-align: center;
