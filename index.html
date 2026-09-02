@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بابا المجال - أداة مضاعفة الملفات</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- استدعاء خط تجوال (الأساسي) وخط أميري (للخط الملكي الفخم) -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -42,9 +43,42 @@
             top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('image_eedd30.png');
             background-size: contain; 
-            background-position: center top 5%;
+            background-position: center top 7%; /* نزلناها سِنة بسيطة علشان الهيدر */
             background-repeat: no-repeat;
             z-index: 2;
+        }
+
+        /* --- الهيدر الملكي الجديد --- */
+        .royal-header {
+            position: fixed;
+            top: 3%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .royal-title {
+            font-family: 'Amiri', serif; /* الخط الملكي العربي */
+            color: #d4af37; /* لون ذهبي فخم */
+            font-size: 36px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(212, 175, 55, 0.4); /* توهج ذهبي وظل أسود */
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .royal-phone {
+            font-family: 'Tajawal', sans-serif;
+            color: #f3e5ab; /* لون ذهبي فاتح يميل للأبيض */
+            font-size: 24px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            margin: 0;
+            letter-spacing: 3px;
         }
 
         /* المربع الزجاجي للأداة */
@@ -61,7 +95,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             z-index: 3;
             position: relative;
-            margin-top: 30vh; 
+            margin-top: 35vh; 
         }
 
         h1 {
@@ -153,9 +187,11 @@
         }
 
         @media (max-width: 350px) {
+            .royal-title { font-size: 28px; }
+            .royal-phone { font-size: 20px; }
             h1 { font-size: 32px; }
             h2 { font-size: 16px; }
-            .glass-card { padding: 25px 20px; }
+            .glass-card { padding: 25px 20px; margin-top: 40vh; }
         }
     </style>
 </head>
@@ -163,6 +199,12 @@
 
     <div class="bg-blur"></div>
     <div class="bg-clear"></div>
+
+    <!-- الهيدر الملكي -->
+    <div class="royal-header">
+        <h3 class="royal-title">الإنجاز رقم 1 فى المملكة</h3>
+        <p class="royal-phone" dir="ltr">0545098312</p>
+    </div>
 
     <div class="glass-card">
         <h1>بابا المجال</h1>
@@ -175,7 +217,6 @@
 
         <div class="input-group">
             <label for="multiplier">عدد مرات النسخ (CRLF):</label>
-            <!-- القيمة الافتراضية بقت 1 علشان ينزل ملف واحد على الأقل -->
             <input type="number" id="multiplier" min="1" value="1">
         </div>
 
@@ -205,7 +246,6 @@
             const file = fileInput.files[0];
             const reader = new FileReader();
 
-            // قراءة الملف كـ ArrayBuffer للحفاظ على التشفير
             reader.onload = function(e) {
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
@@ -231,10 +271,7 @@
                 const blob = new Blob([newView], { type: 'application/octet-stream' });
                 const originalName = file.name;
 
-                // التعديل الجديد: تحميل ملفات متعددة بشكل مستقل بناءً على الرقم المدخل
                 for (let i = 1; i <= multiplier; i++) {
-                    // استخدام setTimeout لعمل فاصل زمني (نصف ثانية) بين كل تحميل
-                    // علشان المتصفح ميعتبرهاش Spam ويمنع التحميل المتعدد
                     setTimeout(() => {
                         let namePrefix = '';
                         for (let k = 0; k < i; k++) {
@@ -251,9 +288,8 @@
                         a.click();
                         document.body.removeChild(a);
                         
-                        // تنظيف الذاكرة بعد التحميل
                         setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
-                    }, i * 500); // زيادة الوقت لكل ملف
+                    }, i * 500); 
                 }
             };
 
