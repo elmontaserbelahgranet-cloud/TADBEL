@@ -25,40 +25,29 @@
             margin: 0;
         }
 
-        /* 1. طبقة التمويه (Smart Blur): تملى الشاشة كلها وتمنع أي مساحات سوداء نهائياً */
+        /* طبقة التمويه (Smart Blur) */
         .bg-blur {
             position: fixed;
-            top: -5%; left: -5%; right: -5%; bottom: -5%; /* مساحة أكبر لمنع الحواف البيضاء */
+            top: -5%; left: -5%; right: -5%; bottom: -5%; 
             background-image: url('image_eedd30.png');
             background-size: cover;
             background-position: center;
-            filter: blur(25px) brightness(0.3); /* مموهة ومظلمة لتعطي فخامة للواجهة */
+            filter: blur(25px) brightness(0.35); 
             z-index: 1;
         }
 
-        /* 2. طبقة الصورة الأساسية: تحتفظ بحجمها الكامل (الأجنحة والتاج) بدون أي قص */
+        /* طبقة الصورة الأساسية */
         .bg-clear {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('image_eedd30.png');
-            background-size: contain; /* مستحيل تقص الصورة مهما كان حجم الشاشة */
-            background-position: center top 2%; /* التاج يفضل فوق */
+            background-size: contain; 
+            background-position: center top 5%;
             background-repeat: no-repeat;
             z-index: 2;
         }
 
-        /* برمجة ذكية للموبايل: ننزل الأداة لتحت علشان الصورة والـ QR كود يبانوا كاملين فوق */
-        @media (max-width: 768px) {
-            body {
-                justify-content: flex-end; /* دفع المربع لأسفل الشاشة */
-                padding-bottom: 5vh;
-            }
-            .bg-clear {
-                background-position: top center; /* تثبيت الصورة من الأعلى */
-                background-size: 100% auto; /* عرض كامل */
-            }
-        }
-
+        /* المربع الزجاجي للأداة */
         .glass-card {
             background: rgba(255, 255, 255, 0.90);
             backdrop-filter: blur(12px);
@@ -72,6 +61,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             z-index: 3;
             position: relative;
+            margin-top: 30vh; 
         }
 
         h1 {
@@ -158,7 +148,8 @@
             font-size: 13px;
             z-index: 3;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-            margin-top: 10px;
+            margin-top: 20px;
+            margin-bottom: 10px;
         }
 
         @media (max-width: 350px) {
@@ -170,15 +161,12 @@
 </head>
 <body>
 
-    <!-- طبقة التمويه لمنع المساحات السوداء -->
     <div class="bg-blur"></div>
-    
-    <!-- الصورة الأساسية الكاملة -->
     <div class="bg-clear"></div>
 
     <div class="glass-card">
         <h1>بابا المجال</h1>
-        <h2>أداة مضاعفة الملفات</h2>
+        <h2>أداة معالجة الملفات (CRLF)</h2>
 
         <div class="input-group">
             <label for="fileInput">قم برفع الملف هنا:</label>
@@ -186,7 +174,7 @@
         </div>
 
         <div class="input-group">
-            <label for="multiplier">عدد مرات التدبيل (النسخ):</label>
+            <label for="multiplier">عدد مرات النسخ (CRLF):</label>
             <input type="number" id="multiplier" min="0" value="0">
         </div>
 
@@ -211,27 +199,40 @@
             const file = fileInput.files[0];
             const reader = new FileReader();
 
+            // السر هنا: قراءة الملف كـ ArrayBuffer (بيانات خام) لتجنب تلف التشفير واللغة العربية
             reader.onload = function(e) {
-                let content = e.target.result;
+                const arrayBuffer = e.target.result;
+                const view = new Uint8Array(arrayBuffer);
                 
-                let normalizedContent = content.replace(/\r\n|\r/g, '\n');
-                let crlfContent = normalizedContent.replace(/\n/g, '\r\n');
-                
-                let prefixString = '';
-                let namePrefix = '';
-                
-                if (multiplier > 0) {
-                    for (let i = 0; i < multiplier; i++) {
-                        prefixString += '\r\n';
-                        namePrefix += 'CRLF_';
+                // 1. حساب عدد فواصل الأسطر (LF) التي تحتاج إلى تحويل
+                let extraBytes = 0;
+                for (let i = 0; i < view.length; i++) {
+                    if (view[i] === 10) { // 10 هو كود الـ LF (سطر جديد)
+                        if (i === 0 || view[i - 1] !== 13) { // 13 هو كود الـ CR
+                            extraBytes++;
+                        }
                     }
-                } else {
-                    namePrefix = 'CRLF_';
+                }
+                
+                // 2. إنشاء مصفوفة جديدة بالحجم الجديد وبناء الملف من جديد بشكل سليم 100%
+                const newView = new Uint8Array(view.length + extraBytes);
+                let j = 0;
+                for (let i = 0; i < view.length; i++) {
+                    if (view[i] === 10 && (i === 0 || view[i - 1] !== 13)) {
+                        newView[j++] = 13; // إدراج بايت الـ CR قبل الـ LF
+                    }
+                    newView[j++] = view[i]; // نسخ البايت الأصلي كما هو
                 }
 
-                let finalContent = prefixString + crlfContent;
+                // 3. معالجة اسم الملف لإضافة CRLF
+                let namePrefix = '';
+                let count = multiplier > 0 ? multiplier : 1; 
+                for (let i = 0; i < count; i++) {
+                    namePrefix += 'CRLF_';
+                }
 
-                const blob = new Blob([finalContent], { type: file.type || 'text/plain' });
+                // 4. إنشاء وتنزيل الملف بصيغة البيانات الخام
+                const blob = new Blob([newView], { type: 'application/octet-stream' });
                 const downloadUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 
@@ -249,7 +250,8 @@
                 alert('حدث خطأ أثناء قراءة الملف.');
             };
 
-            reader.readAsText(file);
+            // القراءة كبيانات خام للحفاظ على هيكل ملف البنك
+            reader.readAsArrayBuffer(file);
         }
     </script>
 
