@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بابا المجال - أداة مضاعفة الملفات</title>
-    <!-- استدعاء خط تجوال (الأساسي) وخط أميري (للخط الملكي الفخم) -->
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- استدعاء خط تجوال وخط أميري -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -26,7 +26,7 @@
             margin: 0;
         }
 
-        /* طبقة التمويه (Smart Blur) */
+        /* طبقة التمويه */
         .bg-blur {
             position: fixed;
             top: -5%; left: -5%; right: -5%; bottom: -5%; 
@@ -43,50 +43,17 @@
             top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('image_eedd30.png');
             background-size: contain; 
-            background-position: center top 7%; /* نزلناها سِنة بسيطة علشان الهيدر */
+            background-position: center top 5%;
             background-repeat: no-repeat;
             z-index: 2;
         }
 
-        /* --- الهيدر الملكي الجديد --- */
-        .royal-header {
-            position: fixed;
-            top: 3%;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .royal-title {
-            font-family: 'Amiri', serif; /* الخط الملكي العربي */
-            color: #d4af37; /* لون ذهبي فخم */
-            font-size: 36px;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(212, 175, 55, 0.4); /* توهج ذهبي وظل أسود */
-            margin: 0;
-            letter-spacing: 1px;
-        }
-
-        .royal-phone {
-            font-family: 'Tajawal', sans-serif;
-            color: #f3e5ab; /* لون ذهبي فاتح يميل للأبيض */
-            font-size: 24px;
-            font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-            margin: 0;
-            letter-spacing: 3px;
-        }
-
-        /* المربع الزجاجي للأداة */
+        /* المربع الزجاجي */
         .glass-card {
             background: rgba(255, 255, 255, 0.90);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            padding: 35px 25px;
+            padding: 30px 25px;
             border-radius: 12px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
             width: 88%;
@@ -95,23 +62,59 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             z-index: 3;
             position: relative;
-            margin-top: 35vh; 
+            margin-top: 25vh; 
         }
 
         h1 {
             color: #b38b4d;
-            font-size: 40px;
+            font-size: 38px;
             font-weight: 800;
             margin-bottom: 5px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         h2 {
-            color: #000;
-            font-size: 20px;
+            color: #333;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
+
+        /* --- التصميم الملكي الجديد فوق صندوق الإدخال --- */
+        .crowned-text {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed rgba(166, 124, 58, 0.4); /* خط ذهبي متقطع يفصل بينها وبين الأداة */
+        }
+
+        .crown-emoji {
+            font-size: 45px; /* تاج كبير */
+            display: block;
+            margin-bottom: -15px; /* سحب التاج لأسفل ليلبس الكلمة */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 2;
+            position: relative;
+        }
+
+        .royal-title-card {
+            font-family: 'Amiri', serif; /* خط ملكي */
+            color: #a67c3a; /* لون ذهبي */
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .royal-phone-card {
+            font-family: 'Tajawal', sans-serif;
+            color: #000;
+            font-size: 24px;
+            font-weight: 800;
+            margin: 5px 0 0 0;
+            letter-spacing: 2px;
+        }
+        /* ------------------------------------------- */
 
         .input-group {
             margin-bottom: 20px;
@@ -187,11 +190,11 @@
         }
 
         @media (max-width: 350px) {
-            .royal-title { font-size: 28px; }
-            .royal-phone { font-size: 20px; }
             h1 { font-size: 32px; }
-            h2 { font-size: 16px; }
-            .glass-card { padding: 25px 20px; margin-top: 40vh; }
+            .royal-title-card { font-size: 24px; }
+            .royal-phone-card { font-size: 20px; }
+            .crown-emoji { font-size: 35px; margin-bottom: -10px; }
+            .glass-card { padding: 25px 20px; }
         }
     </style>
 </head>
@@ -200,15 +203,16 @@
     <div class="bg-blur"></div>
     <div class="bg-clear"></div>
 
-    <!-- الهيدر الملكي -->
-    <div class="royal-header">
-        <h3 class="royal-title">الإنجاز رقم 1 فى المملكة</h3>
-        <p class="royal-phone" dir="ltr">0545098312</p>
-    </div>
-
     <div class="glass-card">
         <h1>بابا المجال</h1>
         <h2>أداة معالجة الملفات (CRLF)</h2>
+
+        <!-- القسم الملكي فوق صندوق الإدخال مباشرة -->
+        <div class="crowned-text">
+            <span class="crown-emoji">👑</span>
+            <h3 class="royal-title-card">الإنجاز رقم 1 فى المملكة</h3>
+            <p class="royal-phone-card" dir="ltr">0545098312</p>
+        </div>
 
         <div class="input-group">
             <label for="fileInput">قم برفع الملف هنا:</label>
