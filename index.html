@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بابا المجال - أداة مضاعفة الملفات</title>
-    <!-- استدعاء خط عربي أنيق ليتناسب مع فخامة التصميم -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -15,7 +14,6 @@
 
         body {
             font-family: 'Tajawal', sans-serif;
-            /* الخلفية يتم استدعاؤها من نفس المجلد */
             background-image: url('image_eedd30.png'); 
             background-size: cover;
             background-position: center;
@@ -29,7 +27,6 @@
             position: relative;
         }
 
-        /* طبقة شفافة داكنة فوق الخلفية لتوضيح المربع الأبيض */
         body::before {
             content: "";
             position: absolute;
@@ -39,24 +36,23 @@
         }
 
         .glass-card {
-            /* تصميم المربع الزجاجي الشفاف */
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 40px 30px;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 40px 35px;
+            border-radius: 12px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             width: 90%;
             max-width: 420px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.5);
-            z-index: 2; /* ليكون فوق الطبقة الداكنة */
+            z-index: 2;
             margin-bottom: 20px;
         }
 
         h1 {
-            color: #b38b4d; /* لون ذهبي/نحاسي مطابق للتصميم */
-            font-size: 42px;
+            color: #b38b4d;
+            font-size: 44px;
             font-weight: 800;
             margin-bottom: 5px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
@@ -64,7 +60,7 @@
 
         h2 {
             color: #000;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             margin-bottom: 35px;
         }
@@ -79,7 +75,7 @@
             margin-bottom: 8px;
             font-weight: 700;
             font-size: 15px;
-            color: #111;
+            color: #000;
         }
 
         input[type="file"], input[type="number"] {
@@ -91,10 +87,17 @@
             background: #fff;
             font-family: inherit;
             transition: border-color 0.3s;
+            color: #333;
         }
 
         input[type="file"]::file-selector-button {
             font-family: 'Tajawal', sans-serif;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 10px;
         }
 
         input[type="file"]:focus, input[type="number"]:focus {
@@ -103,7 +106,7 @@
         }
 
         button {
-            background-color: #a67c3a; /* لون الزر الذهبي/النحاسي */
+            background-color: #a67c3a;
             color: #fff;
             border: none;
             padding: 15px;
@@ -135,7 +138,6 @@
             padding-bottom: 20px;
         }
 
-        /* تحسينات للشاشات الصغيرة جداً */
         @media (max-width: 350px) {
             h1 { font-size: 36px; }
             h2 { font-size: 18px; }
@@ -156,10 +158,10 @@
 
         <div class="input-group">
             <label for="multiplier">عدد مرات التدبيل (النسخ):</label>
-            <input type="number" id="multiplier" min="1" value="0">
+            <input type="number" id="multiplier" min="0" value="0">
         </div>
 
-        <button onclick="doubleFile()">تنفيذ وتحميل الملف</button>
+        <button onclick="processFile()">تنفيذ وتحميل الملف</button>
     </div>
 
     <div class="footer">
@@ -167,18 +169,13 @@
     </div>
 
     <script>
-        function doubleFile() {
+        function processFile() {
             const fileInput = document.getElementById('fileInput');
             const multiplierInput = document.getElementById('multiplier').value;
-            const multiplier = parseInt(multiplierInput);
+            const multiplier = parseInt(multiplierInput) || 0;
 
             if (fileInput.files.length === 0) {
                 alert('يرجى اختيار ملف أولاً.');
-                return;
-            }
-
-            if (isNaN(multiplier) || multiplier <= 0) {
-                alert('يرجى إدخال عدد مرات تدبيل صحيح (أكبر من 0).');
                 return;
             }
 
@@ -186,27 +183,40 @@
             const reader = new FileReader();
 
             reader.onload = function(e) {
-                const originalContent = e.target.result;
-                let finalContent = '';
-
-                // تكرار المحتوى بناءً على الرقم المدخل
-                for (let i = 0; i < multiplier; i++) {
-                    finalContent += originalContent;
-                    // إضافة سطر جديد بين كل نسخة وأخرى إذا لم يكن موجوداً
-                    if (!originalContent.endsWith('\n') && !originalContent.endsWith('\r\n')) {
-                        finalContent += '\n';
+                let content = e.target.result;
+                
+                // 1. تحويل الملف بالكامل إلى صيغة CRLF (نفس وظيفة الموقع اللي بعته بالكربون)
+                let normalizedContent = content.replace(/
+|/g, '
+');
+                let crlfContent = normalizedContent.replace(/
+/g, '
+');
+                
+                // 2. إضافة فواصل CRLF في بداية الملف بناءً على الرقم المدخل (التدبيل)
+                let prefixString = '';
+                let namePrefix = '';
+                
+                if (multiplier > 0) {
+                    for (let i = 0; i < multiplier; i++) {
+                        prefixString += '
+';
+                        namePrefix += 'CRLF_';
                     }
+                } else {
+                    // لو الرقم 0، هيسمي الملف مرة واحدة بس CRLF_ ويعمل التحويل العادي
+                    namePrefix = 'CRLF_';
                 }
 
-                // إنشاء الملف الجديد
+                // دمج الإضافات مع المحتوى المحول
+                let finalContent = prefixString + crlfContent;
+
+                // إنشاء الملف وتنزيله
                 const blob = new Blob([finalContent], { type: file.type || 'text/plain' });
                 const downloadUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 
-                // تجهيز اسم الملف الجديد
-                const fileNameParts = file.name.split('.');
-                const ext = fileNameParts.length > 1 ? '.' + fileNameParts.pop() : '';
-                const newName = fileNameParts.join('.') + '_doubled' + ext;
+                const newName = namePrefix + file.name;
 
                 a.href = downloadUrl;
                 a.download = newName;
