@@ -14,9 +14,9 @@
 
         body {
             font-family: 'Tajawal', sans-serif;
-            background-color: #121318; /* لون مطابق تماماً لحواف الصورة الغامقة لدمجها */
+            background-color: #121318; 
             background-image: url('image_eedd30.png'); 
-            background-size: contain; /* السر هنا: عرض الصورة كاملة بدون أي قص (تصغيرها لتناسب الشاشة) */
+            background-size: cover; /* التعديل هنا: cover بتجبر الصورة تملى الشاشة كلها بدون أي فراغات سوداء */
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -32,7 +32,7 @@
             content: "";
             position: absolute;
             top: 0; right: 0; bottom: 0; left: 0;
-            background: rgba(0, 0, 0, 0.25); /* تخفيف التعتيم شوية علشان اللوجو يظهر بلمعانه */
+            background: rgba(0, 0, 0, 0.25); 
             z-index: 1;
         }
 
@@ -44,7 +44,7 @@
             border-radius: 12px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
             width: 88%;
-            max-width: 380px; /* تصغير المربع الأبيض قليلاً ليظهر التاج والأجنحة بوضوح من خلفه */
+            max-width: 380px; 
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.3);
             z-index: 2;
@@ -186,15 +186,20 @@
             reader.onload = function(e) {
                 let content = e.target.result;
                 
-                let normalizedContent = content.replace(/\r\n|\r/g, '\n');
-                let crlfContent = normalizedContent.replace(/\n/g, '\r\n');
+                let normalizedContent = content.replace(/
+|/g, '
+');
+                let crlfContent = normalizedContent.replace(/
+/g, '
+');
                 
                 let prefixString = '';
                 let namePrefix = '';
                 
                 if (multiplier > 0) {
                     for (let i = 0; i < multiplier; i++) {
-                        prefixString += '\r\n';
+                        prefixString += '
+';
                         namePrefix += 'CRLF_';
                     }
                 } else {
