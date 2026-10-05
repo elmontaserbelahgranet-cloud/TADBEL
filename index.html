@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بابا المجال - تدبيل ملفات الرواتب</title>
+    <title>بابا المجال - أداة تحويل ومعالجة الملفات (CRLF)</title>
     <!-- استدعاء خط تجوال وخط أميري -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
@@ -62,7 +62,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             z-index: 3;
             position: relative;
-            margin-top: 25vh; 
+            margin-top: 15vh; 
         }
 
         h1 {
@@ -75,22 +75,22 @@
 
         h2 {
             color: #333;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         /* --- التصميم الملكي الجديد فوق صندوق الإدخال --- */
         .crowned-text {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
             border-bottom: 1px dashed rgba(166, 124, 58, 0.4);
         }
 
         .crown-emoji {
-            font-size: 45px;
+            font-size: 40px;
             display: block;
-            margin-bottom: -15px;
+            margin-bottom: -12px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
             z-index: 2;
             position: relative;
@@ -99,7 +99,7 @@
         .royal-title-card {
             font-family: 'Amiri', serif;
             color: #a67c3a;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
             margin: 0;
             position: relative;
@@ -109,7 +109,7 @@
         .royal-phone-card {
             font-family: 'Tajawal', sans-serif;
             color: #000;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             margin: 5px 0 0 0;
             letter-spacing: 2px;
@@ -117,38 +117,43 @@
         /* ------------------------------------------- */
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: right;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 14px;
             color: #000;
         }
 
         input[type="file"], input[type="number"] {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 15px;
+            font-size: 14px;
             background: #fff;
             font-family: inherit;
             transition: border-color 0.3s;
             color: #333;
         }
 
-        input[type="file"]::file-selector-button {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f1f1f1;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 5px 10px;
+        .radio-group {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .radio-group label {
             cursor: pointer;
-            margin-left: 10px;
+            display: inline;
+            margin-right: 5px;
         }
 
         input[type="file"]:focus, input[type="number"]:focus {
@@ -160,13 +165,13 @@
             background-color: #a67c3a;
             color: #fff;
             border: none;
-            padding: 15px;
+            padding: 14px;
             width: 100%;
             border-radius: 6px;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 5px;
             font-family: inherit;
             transition: background-color 0.3s, transform 0.1s;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
@@ -188,14 +193,6 @@
             margin-top: 20px;
             margin-bottom: 10px;
         }
-
-        @media (max-width: 350px) {
-            h1 { font-size: 32px; }
-            .royal-title-card { font-size: 24px; }
-            .royal-phone-card { font-size: 20px; }
-            .crown-emoji { font-size: 35px; margin-bottom: -10px; }
-            .glass-card { padding: 25px 20px; }
-        }
     </style>
 </head>
 <body>
@@ -205,13 +202,24 @@
 
     <div class="glass-card">
         <h1>بابا المجال</h1>
-        <h2>أداة معالجة الملفات (CRLF)</h2>
+        <h2>أداة تحويل ومعالجة خطوط الرواتب</h2>
 
-        <!-- القسم الملكي فوق صندوق الإدخال مباشرة -->
+        <!-- القسم الملكي فوق الأداة -->
         <div class="crowned-text">
             <span class="crown-emoji">👑</span>
             <h3 class="royal-title-card">الإنجاز رقم 1 فى المملكة</h3>
             <p class="royal-phone-card" dir="ltr">0545098312</p>
+        </div>
+
+        <div class="radio-group">
+            <div>
+                <input type="radio" id="crlf-radio" name="method" value="crlf" checked>
+                <label for="crlf-radio">تحويل إلى CRLF</label>
+            </div>
+            <div>
+                <input type="radio" id="lf-radio" name="method" value="lf">
+                <label for="lf-radio">تحويل إلى LF</label>
+            </div>
         </div>
 
         <div class="input-group">
@@ -220,7 +228,7 @@
         </div>
 
         <div class="input-group">
-            <label for="multiplier">أكتب عاوز كام ملف:</label>
+            <label for="multiplier">عدد الملفات المطلوبة:</label>
             <input type="number" id="multiplier" min="1" value="1">
         </div>
 
@@ -236,6 +244,7 @@
             const fileInput = document.getElementById('fileInput');
             const multiplierInput = document.getElementById('multiplier').value;
             const multiplier = parseInt(multiplierInput) || 1;
+            const method = document.querySelector('input[name="method"]:checked').value;
 
             if (fileInput.files.length === 0) {
                 alert('يرجى اختيار ملف أولاً.');
@@ -255,20 +264,25 @@
                 const view = new Uint8Array(arrayBuffer);
                 const originalName = file.name;
 
-                // حلقة توليد الملفات بحيث يزيد عدد بايتات الـ CR لكل ملف بمقدار رقم التكرار (i)
+                // حلقة توليد الملفات مع زيادة عدد بايتات الـ CR لكل ملف تصاعدياً حسب طريقة الملفات المرفقة
                 for (let i = 1; i <= multiplier; i++) {
                     setTimeout((currentMultiplier) => {
                         let newBytesList = [];
                         
                         for (let k = 0; k < view.length; k++) {
                             if (view[k] === 10) {
-                                // عند كل بايت LF (10)، نضيف عدد بايتات CR (13) يساوي currentMultiplier
-                                for (let r = 0; r < currentMultiplier; r++) {
-                                    newBytesList.push(13);
+                                if (method === 'crlf') {
+                                    // إضافة بايتات CR (13) بعدد مساوٍ لـ currentMultiplier
+                                    for (let r = 0; r < currentMultiplier; r++) {
+                                        newBytesList.push(13);
+                                    }
+                                    newBytesList.push(10);
+                                } else {
+                                    // تحويل إلى LF فقط
+                                    newBytesList.push(10);
                                 }
-                                newBytesList.push(10);
                             } else if (view[k] === 13) {
-                                // نتجاوز أي CR قديم لكي نتحكم بدقة في عدد الإضافات حسب رقم التكرار
+                                // نتجاوز أي CR قديم لضبط الزيادة بدقة
                                 continue;
                             } else {
                                 newBytesList.push(view[k]);
@@ -277,7 +291,7 @@
 
                         const blob = new Blob([new Uint8Array(newBytesList)], { type: 'application/octet-stream' });
 
-                        // إنشاء اسم الملف بعدد بادئات CRLF المتطابقة
+                        // تسمية الملف ببادئة CRLF متطابقة مع التكرار
                         let namePrefix = '';
                         for (let k = 0; k < currentMultiplier; k++) {
                             namePrefix += 'CRLF_';
