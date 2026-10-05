@@ -254,7 +254,7 @@
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
                 
-                // استخراج الأسطر بدقة من البايتات
+                // 1. تنظيف وفصل الأسطر الأصلية بدقة تامة من أي رموز تحكم قديمة
                 let lines = [];
                 let currentLine = [];
                 for (let i = 0; i < view.length; i++) {
@@ -269,40 +269,31 @@
                     lines.push(new Uint8Array(currentLine));
                 }
 
-                console.log("عدد الأسطر الأصلية:", lines.length);
                 const originalName = file.name;
 
-                // لكل ملف مطلوب، نقوم بإنشاء نسخة مع زيادة عدد الأسطر (مثلاً إضافة أسطر فوق الأصلية)
+                // 2. توليد الملفات بناءً على رقم التكرار (multiplier)
                 for (let i = 1; i <= multiplier; i++) {
-                    setTimeout(() => {
-                        let targetLines = lines.map(l => new Uint8Array(l)); // نسخ الأسطر الأصلية
+                    setTimeout((currentMultiplier) => {
+                        let finalBytes = [];
                         
-                        // نزود أسطر بناءً على رقم الملف (i) لزيادة العدد الإجمالي تماماً كما طلبت
-                        if (targetLines.length > 1) {
-                            let sampleLine = targetLines[targetLines.length - 1];
-                            for (let add = 0; add < i; add++) {
-                                targetLines.push(new Uint8Array(sampleLine));
-                            }
-                        }
-
-                        // تجميع البايتات مع وضع نهايات السطور بنظام \r\r\n المظبوط
-                        let finalBytesList = [];
-                        targetLines.forEach((line, index) => {
+                        lines.forEach((line, idx) => {
                             for (let b of line) {
-                                finalBytesList.push(b);
+                                finalBytes.push(b);
                             }
-                            if (index < targetLines.length - 1) {
-                                finalBytesList.push(13); // \r
-                                finalBytesList.push(13); // \r
-                                finalBytesList.push(10); // \n
+                            if (idx < lines.length - 1) {
+                                // إضافة عدد \r (بايت 13) يساوي رقم الملف (currentMultiplier)، متبوعاً بـ \n (بايت 10) واحد
+                                for (let r = 0; r < currentMultiplier; r++) {
+                                    finalBytes.push(13); // CR
+                                }
+                                finalBytes.push(10); // LF
                             }
                         });
 
-                        const newView = new Uint8Array(finalBytesList);
-                        const blob = new Blob([newView], { type: 'application/octet-stream' });
+                        const blob = new Blob([new Uint8Array(finalBytes)], { type: 'application/octet-stream' });
 
+                        // بناء اسم الملف بعدد بادئات CRLF المتطابقة مع رقم التكرار
                         let namePrefix = '';
-                        for (let k = 0; k < i; k++) {
+                        for (let k = 0; k < currentMultiplier; k++) {
                             namePrefix += 'CRLF_';
                         }
                         
@@ -317,7 +308,7 @@
                         document.body.removeChild(a);
                         
                         setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
-                    }, i * 500); 
+                    }, i * 500, i); 
                 }
             };
 
