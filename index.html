@@ -254,7 +254,18 @@
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
                 
-                // استخراج الأسطر الأصلية بدقة تامة بدون تلف المسافات
+                // تنظيف الملف من أي رموز تحكم سابقة لاستخلاص محتوى بايتات الملف الصافية تماماً
+                let rawBytes = [];
+                for (let i = 0; i < view.length; i++) {
+                    // نتجاوز بايتات 13 و 10 المؤقتة لنعيد كتابتها بدقة حسب المطلوب
+                    if (view[i] === 13 || view[i] === 10) {
+                        continue;
+                    }
+                    rawBytes.push(view[i]);
+                }
+
+                // بما أننا نريد الحفاظ على الأسطر، سنقوم بتقسيم البايتات بناءً على محتوى النص الأصلي أو أخذ البايتات كما هي
+                // الطريقة الأضمن والأصح: معالجة مصفوفة البايتات الأصلية مباشرة وعدم إزالة المسافات
                 let lines = [];
                 let currentLine = [];
                 for (let i = 0; i < view.length; i++) {
@@ -271,7 +282,7 @@
 
                 const originalName = file.name;
 
-                // توليد كل ملف بشكل مستقل تماماً حسب رقم الـ multiplier الخاص به
+                // توليد الملفات لكل رقم تكرار بشكل مستقل تماماً
                 for (let i = 1; i <= multiplier; i++) {
                     setTimeout((currentMultiplier) => {
                         let finalBytes = [];
@@ -281,17 +292,17 @@
                                 finalBytes.push(b);
                             }
                             if (idx < lines.length - 1) {
-                                // إضافة عدد \r (بايت 13) يتناسب طردياً مع رقم الملف الحالي (i)
+                                // إضافة عدد بايتات 13 (CR) بعدد مساوٍ لـ currentMultiplier، يليه بايت 10 (LF) واحد
                                 for (let r = 0; r < currentMultiplier; r++) {
-                                    finalBytes.push(13); // CR
+                                    finalBytes.push(13);
                                 }
-                                finalBytes.push(10); // LF
+                                finalBytes.push(10);
                             }
                         });
 
                         const blob = new Blob([new Uint8Array(finalBytes)], { type: 'application/octet-stream' });
 
-                        // تسمية الملف بعدد بادئات CRLF المتطابقة
+                        // إنشاء بادئة الأسماء بعدد CRLF_ متطابق
                         let namePrefix = '';
                         for (let k = 0; k < currentMultiplier; k++) {
                             namePrefix += 'CRLF_';
