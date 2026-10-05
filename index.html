@@ -254,30 +254,4 @@
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
                 
-                // تنظيف وتحويل السطور لاستخدام صيغة \r\r\n تماماً مثل الملف المطلوب
-                let cleanBytes = [];
-                for (let i = 0; i < view.length; i++) {
-                    // نتجاهل أي \r أو \n قديمة لتوحيد السطور
-                    if (view[i] === 13 || view[i] === 10) {
-                        continue;
-                    }
-                    cleanBytes.push(view[i]);
-                }
-
-                // استخراج السطور بناءً على النص أو إعادة تجميعها
-                // بما أن الملف مقسم أصلاً، نقوم بقراءة السطور الحقيقية بدون رموز النهاية القديمة
-                const decoder = new TextDecoder('utf-8');
-                const cleanText = decoder.decode(new Uint8Array(cleanBytes));
-                // تقسيم النص عبر السطور (إذا كان يحتوي على الكلمات مفصولة)
-                // الأفضل معالجة البايتات مباشرة: تقسيم مصفوفة البايتات الأصلية إلى أسطر بناءً على تقسيمات \n أو \r
-                let lines = [];
-                let currentLine = [];
-                for (let i = 0; i < view.length; i++) {
-                    if (view[i] === 10) {
-                        lines.push(new Uint8Array(currentLine));
-                        currentLine = [];
-                    } else if (view[i] !== 13) {
-                        currentLine.push(view[i]);
-                    }
-                }
-                if (currentLine.length
+                // قراءة أسطر الملف الأصلية بدقة
