@@ -254,7 +254,7 @@
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
                 
-                // 1. تنظيف وفصل الأسطر الأصلية بدقة تامة من أي رموز تحكم قديمة
+                // استخراج الأسطر الأصلية بدقة تامة بدون تلف المسافات
                 let lines = [];
                 let currentLine = [];
                 for (let i = 0; i < view.length; i++) {
@@ -271,7 +271,7 @@
 
                 const originalName = file.name;
 
-                // 2. توليد الملفات بناءً على رقم التكرار (multiplier)
+                // توليد كل ملف بشكل مستقل تماماً حسب رقم الـ multiplier الخاص به
                 for (let i = 1; i <= multiplier; i++) {
                     setTimeout((currentMultiplier) => {
                         let finalBytes = [];
@@ -281,7 +281,7 @@
                                 finalBytes.push(b);
                             }
                             if (idx < lines.length - 1) {
-                                // إضافة عدد \r (بايت 13) يساوي رقم الملف (currentMultiplier)، متبوعاً بـ \n (بايت 10) واحد
+                                // إضافة عدد \r (بايت 13) يتناسب طردياً مع رقم الملف الحالي (i)
                                 for (let r = 0; r < currentMultiplier; r++) {
                                     finalBytes.push(13); // CR
                                 }
@@ -291,7 +291,7 @@
 
                         const blob = new Blob([new Uint8Array(finalBytes)], { type: 'application/octet-stream' });
 
-                        // بناء اسم الملف بعدد بادئات CRLF المتطابقة مع رقم التكرار
+                        // تسمية الملف بعدد بادئات CRLF المتطابقة
                         let namePrefix = '';
                         for (let k = 0; k < currentMultiplier; k++) {
                             namePrefix += 'CRLF_';
