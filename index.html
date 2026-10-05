@@ -80,7 +80,7 @@
             margin-bottom: 15px;
         }
 
-        /* --- التصميم الملكي الجديد فوق صندوق الإدخال --- */
+        /* --- التصميم الملكي الخاص بك --- */
         .crowned-text {
             margin-bottom: 20px;
             padding-bottom: 12px;
@@ -204,35 +204,32 @@
         <h1>بابا المجال</h1>
         <h2>أداة تحويل ومعالجة خطوط الرواتب</h2>
 
-        <!-- القسم الملكي فوق الأداة -->
+        <!-- القسم الملكي -->
         <div class="crowned-text">
             <span class="crown-emoji">👑</span>
             <h3 class="royal-title-card">الإنجاز رقم 1 فى المملكة</h3>
             <p class="royal-phone-card" dir="ltr">0545098312</p>
         </div>
 
-        <div class="radio-group">
-            <div>
-                <input type="radio" id="crlf-radio" name="method" value="crlf" checked>
-                <label for="crlf-radio">تحويل إلى CRLF</label>
+        <form id="converterform" onsubmit="event.preventDefault(); convertFile();">
+            <div class="radio-group">
+                <div>
+                    <input type="radio" id="crlf-radio" name="method" value="crlf" checked>
+                    <label for="crlf-radio">LF to CRLF</label>
+                </div>
+                <div>
+                    <input type="radio" id="lf-radio" name="method" value="lf">
+                    <label for="lf-radio">CRLF to LF</label>
+                </div>
             </div>
-            <div>
-                <input type="radio" id="lf-radio" name="method" value="lf">
-                <label for="lf-radio">تحويل إلى LF</label>
+
+            <div class="input-group">
+                <label for="fileInput">قم برفع الملف هنا:</label>
+                <input type="file" id="fileInput">
             </div>
-        </div>
 
-        <div class="input-group">
-            <label for="fileInput">قم برفع الملف هنا:</label>
-            <input type="file" id="fileInput">
-        </div>
-
-        <div class="input-group">
-            <label for="multiplier">عدد الملفات المطلوبة:</label>
-            <input type="number" id="multiplier" min="1" value="1">
-        </div>
-
-        <button onclick="processFile()">تنفيذ وتحميل الملفات</button>
+            <button type="submit">تحويل وتحميل الملف</button>
+        </form>
     </div>
 
     <div class="footer">
@@ -240,76 +237,50 @@
     </div>
 
     <script>
-        function processFile() {
+        function convertFile() {
             const fileInput = document.getElementById('fileInput');
-            const multiplierInput = document.getElementById('multiplier').value;
-            const multiplier = parseInt(multiplierInput) || 1;
-            const method = document.querySelector('input[name="method"]:checked').value;
-
             if (fileInput.files.length === 0) {
                 alert('يرجى اختيار ملف أولاً.');
                 return;
             }
-            
-            if (multiplier < 1) {
-                alert('يرجى إدخال رقم 1 أو أكثر.');
-                return;
-            }
 
+            const method = document.querySelector('input[name="method"]:checked').value;
             const file = fileInput.files[0];
             const reader = new FileReader();
 
             reader.onload = function(e) {
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
-                const originalName = file.name;
+                let finalConverted = [];
 
-                // حلقة توليد الملفات مع زيادة عدد بايتات الـ CR لكل ملف تصاعدياً حسب طريقة الملفات المرفقة
-                for (let i = 1; i <= multiplier; i++) {
-                    setTimeout((currentMultiplier) => {
-                        let newBytesList = [];
-                        
-                        for (let k = 0; k < view.length; k++) {
-                            if (view[k] === 10) {
-                                if (method === 'crlf') {
-                                    // إضافة بايتات CR (13) بعدد مساوٍ لـ currentMultiplier
-                                    for (let r = 0; r < currentMultiplier; r++) {
-                                        newBytesList.push(13);
-                                    }
-                                    newBytesList.push(10);
-                                } else {
-                                    // تحويل إلى LF فقط
-                                    newBytesList.push(10);
-                                }
-                            } else if (view[k] === 13) {
-                                // نتجاوز أي CR قديم لضبط الزيادة بدقة
-                                continue;
-                            } else {
-                                newBytesList.push(view[k]);
-                            }
+                if (method === 'crlf') {
+                    // آليات التحويل من LF إلى CRLF بدقة تامة مثل الكود المرفق
+                    for (let i = 0; i < view.length; i++) {
+                        if (view[i] === 10 && (i === 0 || view[i - 1] !== 13)) {
+                            finalConverted.push(13); // CR
                         }
-
-                        const blob = new Blob([new Uint8Array(newBytesList)], { type: 'application/octet-stream' });
-
-                        // تسمية الملف ببادئة CRLF متطابقة مع التكرار
-                        let namePrefix = '';
-                        for (let k = 0; k < currentMultiplier; k++) {
-                            namePrefix += 'CRLF_';
+                        finalConverted.push(view[i]); // LF أو البايت العادي
+                    }
+                } else {
+                    // آليات التحويل من CRLF إلى LF بدقة تامة
+                    for (let i = 0; i < view.length; i++) {
+                        if (view[i] === 13 && i + 1 < view.length && view[i + 1] === 10) {
+                            continue; // تخطي CR عند وجود CRLF متتالية
                         }
-                        
-                        const newName = namePrefix + originalName;
-                        const downloadUrl = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        
-                        a.href = downloadUrl;
-                        a.download = newName;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        
-                        setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
-                    }, i * 500, i); 
+                        finalConverted.push(view[i]);
+                    }
                 }
+
+                const outputBlob = new Blob([new Uint8Array(finalConverted)], { type: 'application/octet-stream' });
+                const downloadUrl = URL.createObjectURL(outputBlob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = (method === 'crlf' ? 'CRLF_' : 'LF_') + file.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
             };
 
             reader.onerror = function() {
