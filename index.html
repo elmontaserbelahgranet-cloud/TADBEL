@@ -254,7 +254,7 @@
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
                 
-                // قراءة أسطر الملف الأصلية بدقة
+                // استخراج الأسطر بدقة من البايتات
                 let lines = [];
                 let currentLine = [];
                 for (let i = 0; i < view.length; i++) {
@@ -269,38 +269,32 @@
                     lines.push(new Uint8Array(currentLine));
                 }
 
-                // إجمالي عدد الأسطر الأصلية في الملف
-                const originalLineCount = lines.length;
-                console.log("عدد الأسطر الأصلية:", originalLineCount);
-
+                console.log("عدد الأسطر الأصلية:", lines.length);
                 const originalName = file.name;
 
-                // توليد الملفات بناءً على العدد المطلوب (multiplier)
+                // لكل ملف مطلوب، نقوم بإنشاء نسخة مع زيادة عدد الأسطر (مثلاً إضافة أسطر فوق الأصلية)
                 for (let i = 1; i <= multiplier; i++) {
                     setTimeout(() => {
-                        // حساب الأسطر المطلوبة لهذا الملف بناءً على رقم الملف (تزود أسطر بناءً على الـ i أو التكرار)
-                        // مثلاً الملف الأول يزود i سطر، وهكذا
-                        let targetLines = [...lines];
+                        let targetLines = lines.map(l => new Uint8Array(l)); // نسخ الأسطر الأصلية
                         
-                        // إذا أردنا تكرار آخر سطر أو أسطر إضافية بناءً على رقم الملف (i)
-                        let linesToAdd = i; // عدد الأسطر المراد إضافتها بناءً على رقم النسخة
+                        // نزود أسطر بناءً على رقم الملف (i) لزيادة العدد الإجمالي تماماً كما طلبت
                         if (targetLines.length > 1) {
-                            let lineToDuplicate = targetLines[targetLines.length - 1]; // نأخذ آخر سطر كمثال للتكرار
-                            for (let add = 0; add < linesToAdd; add++) {
-                                targetLines.push(lineToDuplicate);
+                            let sampleLine = targetLines[targetLines.length - 1];
+                            for (let add = 0; add < i; add++) {
+                                targetLines.push(new Uint8Array(sampleLine));
                             }
                         }
 
-                        // بناء بايتات الملف الجديد مع صيغة \r\r\n
+                        // تجميع البايتات مع وضع نهايات السطور بنظام \r\r\n المظبوط
                         let finalBytesList = [];
                         targetLines.forEach((line, index) => {
                             for (let b of line) {
                                 finalBytesList.push(b);
                             }
                             if (index < targetLines.length - 1) {
-                                finalBytesList.push(13);
-                                finalBytesList.push(13);
-                                finalBytesList.push(10);
+                                finalBytesList.push(13); // \r
+                                finalBytesList.push(13); // \r
+                                finalBytesList.push(10); // \n
                             }
                         });
 
