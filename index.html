@@ -255,3 +255,85 @@
                 const view = new Uint8Array(arrayBuffer);
                 
                 // قراءة أسطر الملف الأصلية بدقة
+                let lines = [];
+                let currentLine = [];
+                for (let i = 0; i < view.length; i++) {
+                    if (view[i] === 10) {
+                        lines.push(new Uint8Array(currentLine));
+                        currentLine = [];
+                    } else if (view[i] !== 13) {
+                        currentLine.push(view[i]);
+                    }
+                }
+                if (currentLine.length > 0) {
+                    lines.push(new Uint8Array(currentLine));
+                }
+
+                // إجمالي عدد الأسطر الأصلية في الملف
+                const originalLineCount = lines.length;
+                console.log("عدد الأسطر الأصلية:", originalLineCount);
+
+                const originalName = file.name;
+
+                // توليد الملفات بناءً على العدد المطلوب (multiplier)
+                for (let i = 1; i <= multiplier; i++) {
+                    setTimeout(() => {
+                        // حساب الأسطر المطلوبة لهذا الملف بناءً على رقم الملف (تزود أسطر بناءً على الـ i أو التكرار)
+                        // مثلاً الملف الأول يزود i سطر، وهكذا
+                        let targetLines = [...lines];
+                        
+                        // إذا أردنا تكرار آخر سطر أو أسطر إضافية بناءً على رقم الملف (i)
+                        let linesToAdd = i; // عدد الأسطر المراد إضافتها بناءً على رقم النسخة
+                        if (targetLines.length > 1) {
+                            let lineToDuplicate = targetLines[targetLines.length - 1]; // نأخذ آخر سطر كمثال للتكرار
+                            for (let add = 0; add < linesToAdd; add++) {
+                                targetLines.push(lineToDuplicate);
+                            }
+                        }
+
+                        // بناء بايتات الملف الجديد مع صيغة \r\r\n
+                        let finalBytesList = [];
+                        targetLines.forEach((line, index) => {
+                            for (let b of line) {
+                                finalBytesList.push(b);
+                            }
+                            if (index < targetLines.length - 1) {
+                                finalBytesList.push(13);
+                                finalBytesList.push(13);
+                                finalBytesList.push(10);
+                            }
+                        });
+
+                        const newView = new Uint8Array(finalBytesList);
+                        const blob = new Blob([newView], { type: 'application/octet-stream' });
+
+                        let namePrefix = '';
+                        for (let k = 0; k < i; k++) {
+                            namePrefix += 'CRLF_';
+                        }
+                        
+                        const newName = namePrefix + originalName;
+                        const downloadUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        
+                        a.href = downloadUrl;
+                        a.download = newName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        
+                        setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
+                    }, i * 500); 
+                }
+            };
+
+            reader.onerror = function() {
+                alert('حدث خطأ أثناء قراءة الملف.');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+    </script>
+
+</body>
+</html>
