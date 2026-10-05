@@ -253,56 +253,31 @@
             reader.onload = function(e) {
                 const arrayBuffer = e.target.result;
                 const view = new Uint8Array(arrayBuffer);
-                
-                // تنظيف الملف من أي رموز تحكم سابقة لاستخلاص محتوى بايتات الملف الصافية تماماً
-                let rawBytes = [];
-                for (let i = 0; i < view.length; i++) {
-                    // نتجاوز بايتات 13 و 10 المؤقتة لنعيد كتابتها بدقة حسب المطلوب
-                    if (view[i] === 13 || view[i] === 10) {
-                        continue;
-                    }
-                    rawBytes.push(view[i]);
-                }
-
-                // بما أننا نريد الحفاظ على الأسطر، سنقوم بتقسيم البايتات بناءً على محتوى النص الأصلي أو أخذ البايتات كما هي
-                // الطريقة الأضمن والأصح: معالجة مصفوفة البايتات الأصلية مباشرة وعدم إزالة المسافات
-                let lines = [];
-                let currentLine = [];
-                for (let i = 0; i < view.length; i++) {
-                    if (view[i] === 10) {
-                        lines.push(new Uint8Array(currentLine));
-                        currentLine = [];
-                    } else if (view[i] !== 13) {
-                        currentLine.push(view[i]);
-                    }
-                }
-                if (currentLine.length > 0) {
-                    lines.push(new Uint8Array(currentLine));
-                }
-
                 const originalName = file.name;
 
-                // توليد الملفات لكل رقم تكرار بشكل مستقل تماماً
+                // حلقة توليد الملفات بحيث يزيد عدد بايتات الـ CR لكل ملف بمقدار رقم التكرار (i)
                 for (let i = 1; i <= multiplier; i++) {
                     setTimeout((currentMultiplier) => {
-                        let finalBytes = [];
+                        let newBytesList = [];
                         
-                        lines.forEach((line, idx) => {
-                            for (let b of line) {
-                                finalBytes.push(b);
-                            }
-                            if (idx < lines.length - 1) {
-                                // إضافة عدد بايتات 13 (CR) بعدد مساوٍ لـ currentMultiplier، يليه بايت 10 (LF) واحد
+                        for (let k = 0; k < view.length; k++) {
+                            if (view[k] === 10) {
+                                // عند كل بايت LF (10)، نضيف عدد بايتات CR (13) يساوي currentMultiplier
                                 for (let r = 0; r < currentMultiplier; r++) {
-                                    finalBytes.push(13);
+                                    newBytesList.push(13);
                                 }
-                                finalBytes.push(10);
+                                newBytesList.push(10);
+                            } else if (view[k] === 13) {
+                                // نتجاوز أي CR قديم لكي نتحكم بدقة في عدد الإضافات حسب رقم التكرار
+                                continue;
+                            } else {
+                                newBytesList.push(view[k]);
                             }
-                        });
+                        }
 
-                        const blob = new Blob([new Uint8Array(finalBytes)], { type: 'application/octet-stream' });
+                        const blob = new Blob([new Uint8Array(newBytesList)], { type: 'application/octet-stream' });
 
-                        // إنشاء بادئة الأسماء بعدد CRLF_ متطابق
+                        // إنشاء اسم الملف بعدد بادئات CRLF المتطابقة
                         let namePrefix = '';
                         for (let k = 0; k < currentMultiplier; k++) {
                             namePrefix += 'CRLF_';
