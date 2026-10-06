@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بابا المجال - أداة تحويل ومعالجة الملفات (CRLF)</title>
+    <title>بابا المجال - أداة نسخ ومعالجة ملفات الرواتب</title>
     <!-- استدعاء خط تجوال وخط أميري -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
@@ -80,7 +80,7 @@
             margin-bottom: 15px;
         }
 
-        /* --- التصميم الملكي الخاص بك --- */
+        /* --- التصميم الملكي --- */
         .crowned-text {
             margin-bottom: 20px;
             padding-bottom: 12px;
@@ -202,9 +202,8 @@
 
     <div class="glass-card">
         <h1>بابا المجال</h1>
-        <h2>أداة تحويل ومعالجة خطوط الرواتب</h2>
+        <h2>أداة نسخ وتجهيز خطوط الرواتب</h2>
 
-        <!-- القسم الملكي -->
         <div class="crowned-text">
             <span class="crown-emoji">👑</span>
             <h3 class="royal-title-card">الإنجاز رقم 1 فى المملكة</h3>
@@ -224,11 +223,16 @@
             </div>
 
             <div class="input-group">
-                <label for="fileInput">قم برفع الملف هنا:</label>
-                <input type="file" id="fileInput">
+                <label for="numFiles">عدد الملفات المطلوبة (نسخ):</label>
+                <input type="number" id="numFiles" min="1" value="1" required>
             </div>
 
-            <button type="submit">تحويل وتحميل الملف</button>
+            <div class="input-group">
+                <label for="fileInput">قم برفع الملف الأساسي هنا:</label>
+                <input type="file" id="fileInput" required>
+            </div>
+
+            <button type="submit">توليد وتحميل الملفات</button>
         </form>
     </div>
 
@@ -237,57 +241,64 @@
     </div>
 
     <script>
-        function convertFile() {
+        async function convertFile() {
             const fileInput = document.getElementById('fileInput');
-            if (fileInput.files.length === 0) {
+            const numFiles = parseInt(document.getElementById('numFiles').value) || 1;
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const file = fileInput.files[0];
+            
+            if (!file) {
                 alert('يرجى اختيار ملف أولاً.');
                 return;
             }
 
-            const method = document.querySelector('input[name="method"]:checked').value;
-            const file = fileInput.files[0];
             const reader = new FileReader();
 
-            reader.onload = function(e) {
-                const arrayBuffer = e.target.result;
-                const view = new Uint8Array(arrayBuffer);
-                let finalConverted = [];
-
+            reader.onload = async function(e) {
+                let baseText = e.target.result;
+                
+                // توحيد جميع نهايات الأسطر الأصلية لضمان عدم تلف البيانات
+                baseText = baseText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
                 if (method === 'crlf') {
-                    // آليات التحويل من LF إلى CRLF بدقة تامة مثل الكود المرفق
-                    for (let i = 0; i < view.length; i++) {
-                        if (view[i] === 10 && (i === 0 || view[i - 1] !== 13)) {
-                            finalConverted.push(13); // CR
-                        }
-                        finalConverted.push(view[i]); // LF أو البايت العادي
-                    }
-                } else {
-                    // آليات التحويل من CRLF إلى LF بدقة تامة
-                    for (let i = 0; i < view.length; i++) {
-                        if (view[i] === 13 && i + 1 < view.length && view[i + 1] === 10) {
-                            continue; // تخطي CR عند وجود CRLF متتالية
-                        }
-                        finalConverted.push(view[i]);
-                    }
+                    baseText = baseText.replace(/\n/g, '\r\n');
                 }
 
-                const outputBlob = new Blob([new Uint8Array(finalConverted)], { type: 'application/octet-stream' });
-                const downloadUrl = URL.createObjectURL(outputBlob);
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = (method === 'crlf' ? 'CRLF_' : 'LF_') + file.name;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
+                // تحديد شكل السطر الفارغ المطلوب إضافته في نهاية الملف
+                const newlineChar = (method === 'crlf') ? '\r\n' : '\n';
+
+                // توليد عدد الملفات المطلوبة
+                for (let i = 1; i <= numFiles; i++) {
+                    // كل ملف جديد بياخد عدد سطور فارغة في نهايته يساوي رقم النسخة (i)
+                    let extraLines = newlineChar.repeat(i);
+                    let finalConvertedText = baseText + extraLines;
+
+                    const outputBlob = new Blob([finalConvertedText], { type: 'text/plain' });
+                    const downloadUrl = URL.createObjectURL(outputBlob);
+                    
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    
+                    // تسمية الملف برقم النسخة عشان تميزهم بسهولة
+                    let prefix = (method === 'crlf' ? 'CRLF_' : 'LF_');
+                    a.download = prefix + `Copy${i}_` + file.name;
+                    
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
+                    
+                    // تأخير بسيط 300 ملي ثانية بين كل ملف عشان المتصفح يقدر يحملهم كلهم وميهنجش
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
             };
 
             reader.onerror = function() {
                 alert('حدث خطأ أثناء قراءة الملف.');
             };
 
-            reader.readAsArrayBuffer(file);
+            // قراءة الملف كنص لتسهيل إضافة السطور
+            reader.readAsText(file);
         }
     </script>
 
