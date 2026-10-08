@@ -48,6 +48,41 @@
             z-index: 2;
         }
 
+        /* === كود النسر الطائر === */
+        .flying-eagle {
+            position: fixed;
+            width: 140px; /* حجم النسر */
+            z-index: 100; /* لجعله يطير فوق العناصر */
+            pointer-events: none; /* لمنع تفاعل الماوس معه حتى لا يعيق الضغط على الأزرار */
+            border-radius: 50%; /* لجعل الصورة دائرية */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); /* إضافة ظل جمالي */
+            animation: flyAcross 15s linear infinite; /* حركة لمدة 15 ثانية وتتكرر بلا توقف */
+        }
+
+        /* مسار حركة النسر (يطير من اليمين لليسار مع تموجات) */
+        @keyframes flyAcross {
+            0% {
+                right: -150px;
+                top: 15%;
+                transform: translateY(0px) rotate(-15deg);
+            }
+            25% {
+                transform: translateY(40px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-30px) rotate(15deg);
+            }
+            75% {
+                transform: translateY(20px) rotate(0deg);
+            }
+            100% {
+                right: 110vw; /* يعبر الشاشة بالكامل */
+                top: 25%;
+                transform: translateY(0px) rotate(-15deg);
+            }
+        }
+        /* ======================== */
+
         /* المربع الزجاجي */
         .glass-card {
             background: rgba(255, 255, 255, 0.90);
@@ -199,6 +234,9 @@
 
     <div class="bg-blur"></div>
     <div class="bg-clear"></div>
+
+    <!-- لوجو النسر الطائر -->
+    <img src="ee4c5e29-b649-4c87-b92f-35ae37258e1c.jpeg" alt="لوجو النسر" class="flying-eagle">
 
     <div class="glass-card">
         <h1>بابا المجال</h1>
